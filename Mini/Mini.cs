@@ -1,4 +1,5 @@
-﻿using Dalamud.Interface;
+﻿using Dalamud.Game.Command;
+using Dalamud.Interface;
 using Dalamud.Plugin;
 using ImGuiNET;
 using System;
@@ -9,31 +10,35 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using static Mini.Static;
 
 namespace Mini
 {
     class Mini : IDalamudPlugin
     {
-        internal DalamudPluginInterface pi;
-        private const int SW_MINIMIZE = 6;
-
         public string Name => "Mini";
+        bool isHovered = false;
 
         public void Dispose()
         {
-            pi.CommandManager.RemoveHandler("/mini");
-            pi.UiBuilder.OnBuildUi -= Draw;
-            pi.Dispose();
+            Svc.Commands.RemoveHandler("/mini");
+            Svc.PluginInterface.UiBuilder.Draw -= Draw;
+            //miniThread.Dispose();
         }
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public Mini(DalamudPluginInterface pluginInterface)
         {
-            this.pi = pluginInterface;
-            pi.CommandManager.AddHandler("/mini", new Dalamud.Game.Command.CommandInfo(delegate 
+            pluginInterface.Create<Svc>();
+            Svc.Commands.AddHandler("/mini", new CommandInfo(delegate
             {
                 ShowWindow(Process.GetCurrentProcess().MainWindowHandle, SW_MINIMIZE);
-            }));
-            pi.UiBuilder.OnBuildUi += Draw;
+            })
+            {
+                HelpMessage = "Minimize the game"
+            });
+            Svc.PluginInterface.UiBuilder.Draw += Draw;
+            //miniThread = new MiniThread(this);
         }
 
         Vector2 WindowPos = Vector2.Zero;
@@ -53,25 +58,20 @@ namespace Mini
                 | ImGuiWindowFlags.AlwaysAutoResize
                 | ImGuiWindowFlags.NoBackground
                 | ImGuiWindowFlags.AlwaysUseWindowPadding);
+            if (!isHovered)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, 0);
+                ImGui.PushStyleColor(ImGuiCol.Text, 0);
+            }
             if (ImGuiIconButton(FontAwesomeIcon.WindowMinimize))
             {
                 ShowWindow(Process.GetCurrentProcess().MainWindowHandle, SW_MINIMIZE);
             }
+            if (!isHovered) ImGui.PopStyleColor(2);
+            isHovered = ImGui.IsItemHovered();
             WindowPos.X = ImGuiHelpers.MainViewport.Size.X - ImGui.GetColumnWidth();
             ImGui.End();
             ImGui.PopStyleVar(2);
-        }
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        public static bool ImGuiIconButton(FontAwesomeIcon icon)
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            var result = ImGui.Button($"{icon.ToIconString()}##{icon.ToIconString()}-MiniButton");
-            ImGui.PopFont();
-            return result;
         }
     }
 }

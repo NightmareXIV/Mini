@@ -1,6 +1,6 @@
 ﻿{
   "Name": "Mini",
   "Author": "Eternita",
-  "Description": "Adds a button to minimize your game",
+  "Description": "Adds a button and a command to minimize your game into taskbar",
   "RepoUrl": "https://github.com/Eternita-S/Mini"
 }

@@ -20,18 +20,18 @@ namespace Mini
             return result;
         }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetForegroundWindow();
+        /*[DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();*/
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll")]
+        /*[DllImport("user32.dll")]
         public static extern int GetClassName(IntPtr hWnd, IntPtr lpClassName, int nMaxCount);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool IsIconic(IntPtr hWnd);
+        public static extern bool IsIconic(IntPtr hWnd);*/
     }
 }

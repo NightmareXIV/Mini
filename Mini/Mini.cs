@@ -5,13 +5,10 @@ using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using static Mini.Static;
 
 namespace Mini
@@ -36,7 +33,7 @@ namespace Mini
             pluginInterface.Create<Svc>();
             Svc.Commands.AddHandler("/mini", new CommandInfo(delegate
             {
-                ShowWindow(Process.GetCurrentProcess().MainWindowHandle, SW_MINIMIZE);
+                TryMinimize();
             })
             {
                 HelpMessage = "Minimize the game"
@@ -47,6 +44,18 @@ namespace Mini
             Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { open = true; };
             SetAlwaysVisible(config.AlwaysVisible);
             //miniThread = new MiniThread(this);
+        }
+
+        void TryMinimize()
+        {
+            if (TryFindGameWindow(out var hwnd))
+            {
+                ShowWindow(hwnd, SW_MINIMIZE);
+            }
+            else
+            {
+                Svc.PluginInterface.UiBuilder.AddNotification("Failed to minimize game", "Mini", NotificationType.Error);
+            }
         }
 
         void SetAlwaysVisible(bool value)
@@ -83,7 +92,7 @@ namespace Mini
                 }
                 if (ImGuiIconButton(FontAwesomeIcon.WindowMinimize))
                 {
-                    ShowWindow(Process.GetCurrentProcess().MainWindowHandle, SW_MINIMIZE);
+                    TryMinimize();
                 }
                 if (config.TransparentButton && !isHovered) ImGui.PopStyleColor(2);
                 isHovered = ImGui.IsItemHovered();

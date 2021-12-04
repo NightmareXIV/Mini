@@ -19,5 +19,8 @@ namespace Mini
         public bool TransparentButton = false;
         public float Scale = 1f;
         public bool AlwaysVisible = true;
+        public ClickBehavior LeftClickBehavior = ClickBehavior.Minimize;
+        public ClickBehavior RightClickBehavior = ClickBehavior.None;
+        public bool TrayNoActivate = false;
     }
 }

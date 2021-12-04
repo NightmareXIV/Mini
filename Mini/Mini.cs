@@ -1,14 +1,17 @@
 ﻿using Dalamud.Game.Command;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static Mini.Static;
 
 namespace Mini
@@ -20,6 +23,7 @@ namespace Mini
         bool open = false;
         Config config;
         Vector2 WindowPos = Vector2.Zero;
+        NotifyIcon trayIcon = null;
 
         public void Dispose()
         {
@@ -31,12 +35,23 @@ namespace Mini
         public Mini(DalamudPluginInterface pluginInterface)
         {
             pluginInterface.Create<Svc>();
-            Svc.Commands.AddHandler("/mini", new CommandInfo(delegate
+            Svc.Commands.AddHandler("/mini", new CommandInfo(delegate(string command, string arguments)
             {
-                TryMinimize();
+                if (arguments == "tray" || arguments == "t")
+                {
+                    TryMinimizeToTray();
+                }
+                else if (arguments == "config" || arguments == "settings" || arguments == "c" || arguments == "s")
+                {
+                    open = true;
+                }
+                else
+                {
+                    TryMinimize();
+                }
             })
             {
-                HelpMessage = "Minimize the game"
+                HelpMessage = "Minimize the game\n/mini <t|tray> → Minimize to tray\n/mini <c|config|s|settings> → Open settings"
             });
             config = Svc.PluginInterface.GetPluginConfig() as Config ?? new Config();
             WindowPos.Y = config.OffestY;
@@ -51,6 +66,49 @@ namespace Mini
             if (TryFindGameWindow(out var hwnd))
             {
                 ShowWindow(hwnd, SW_MINIMIZE);
+            }
+            else
+            {
+                Svc.PluginInterface.UiBuilder.AddNotification("Failed to minimize game", "Mini", NotificationType.Error);
+            }
+        }
+
+        void TryMinimizeToTray()
+        {
+            if (TryFindGameWindow(out var hwnd))
+            {
+                Icon icon;
+                try
+                {
+                    icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+                }
+                catch (Exception)
+                {
+                    icon = SystemIcons.Application;
+                }
+                if (trayIcon != null)
+                {
+                    trayIcon.Visible = false;
+                    trayIcon.Dispose();
+                    trayIcon = null;
+                }
+                trayIcon = new NotifyIcon()
+                {
+                    Icon = icon,
+                    Text = "FFXIV",
+                    Visible = true,
+                };
+                trayIcon.Click += delegate
+                {
+                    if (TryFindGameWindow(out var tHwnd))
+                    {
+                        ShowWindow(tHwnd, config.TrayNoActivate?SW_SHOWNA:SW_SHOW);
+                        trayIcon.Visible = false;
+                        trayIcon.Dispose();
+                        trayIcon = null;
+                    }
+                };
+                ShowWindow(hwnd, SW_HIDE);
             }
             else
             {
@@ -92,10 +150,29 @@ namespace Mini
                 }
                 if (ImGuiIconButton(FontAwesomeIcon.WindowMinimize))
                 {
-                    TryMinimize();
+                    if (config.LeftClickBehavior == ClickBehavior.Minimize)
+                    {
+                        TryMinimize();
+                    }
+                    else if(config.LeftClickBehavior == ClickBehavior.Minimize_to_tray)
+                    {
+                        TryMinimizeToTray();
+                    }
                 }
                 if (config.TransparentButton && !isHovered) ImGui.PopStyleColor(2);
                 isHovered = ImGui.IsItemHovered();
+                if(isHovered && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                {
+                    //right clicked
+                    if (config.RightClickBehavior == ClickBehavior.Minimize)
+                    {
+                        TryMinimize();
+                    }
+                    else if (config.RightClickBehavior == ClickBehavior.Minimize_to_tray)
+                    {
+                        TryMinimizeToTray();
+                    }
+                }
                 if (config.Position == 0) // right
                 {
                     WindowPos.X = ImGuiHelpers.MainViewport.Size.X - ImGui.GetWindowSize().X + config.OffestX;
@@ -135,6 +212,11 @@ namespace Mini
                         ImGui.DragFloat("Scale", ref config.Scale, 0.02f, 0.1f, 50f);
                         if (config.Scale < 0.1f) config.Scale = 0.1f;
                         if (config.Scale > 50f) config.Scale = 50f;
+                        ImGui.SetNextItemWidth(100f);
+                        Static.ImGuiEnumCombo("Left click behavior", ref config.LeftClickBehavior);
+                        ImGui.SetNextItemWidth(100f);
+                        Static.ImGuiEnumCombo("Right click behavior", ref config.RightClickBehavior);
+                        ImGui.Checkbox("Don't activate while restoring from tray", ref config.TrayNoActivate);
                     }
                 }
                 ImGui.End();

@@ -14,6 +14,9 @@ namespace Mini
     {
         public const int SW_MINIMIZE = 6;
         public const int SW_FORCEMINIMIZE = 11;
+        public const int SW_HIDE = 0;
+        public const int SW_SHOW = 5;
+        public const int SW_SHOWNA = 8;
         public static bool ImGuiIconButton(FontAwesomeIcon icon)
         {
             ImGui.PushFont(UiBuilder.IconFont);
@@ -31,9 +34,9 @@ namespace Mini
         [DllImport("user32.dll")]
         static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
-        [DllImport("user32.dll")]
+        /*[DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool IsWindowVisible(IntPtr hWnd);
+        static extern bool IsWindowVisible(IntPtr hWnd);*/
 
         /*[DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -47,9 +50,16 @@ namespace Mini
                 hwnd = FindWindowEx(IntPtr.Zero, hwnd, "FFXIVGAME", null);
                 if (hwnd == IntPtr.Zero) break;
                 GetWindowThreadProcessId(hwnd, out var pid);
-                if (pid == Process.GetCurrentProcess().Id && IsWindowVisible(hwnd)) break;
+                if (pid == Process.GetCurrentProcess().Id) break;
             }
             return hwnd != IntPtr.Zero;
+        }
+        static public void ImGuiEnumCombo<T>(string name, ref T refConfigField, string[] overrideNames = null) where T : IConvertible
+        {
+            var values = overrideNames ?? Enum.GetValues(typeof(T)).Cast<T>().Select(x => x.ToString().Replace("_", " ")).ToArray();
+            var num = Convert.ToInt32(refConfigField);
+            ImGui.Combo(name, ref num, values, values.Length);
+            refConfigField = Enum.GetValues(typeof(T)).Cast<T>().ToArray()[num];
         }
     }
 }

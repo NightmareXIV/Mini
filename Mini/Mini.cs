@@ -6,6 +6,7 @@ using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -29,6 +30,7 @@ namespace Mini
         {
             Svc.Commands.RemoveHandler("/mini");
             Svc.PluginInterface.UiBuilder.Draw -= Draw;
+            TryDisposeTrayIcon();
             //miniThread.Dispose();
         }
 
@@ -58,6 +60,10 @@ namespace Mini
             Svc.PluginInterface.UiBuilder.Draw += Draw;
             Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { open = true; };
             SetAlwaysVisible(config.AlwaysVisible);
+            if (config.PermaTrayIcon)
+            {
+                new TickScheduler(delegate { CreateTrayIcon(false); }, Svc.Framework);
+            }
             //miniThread = new MiniThread(this);
         }
 
@@ -77,43 +83,61 @@ namespace Mini
         {
             if (TryFindGameWindow(out var hwnd))
             {
-                Icon icon;
-                try
+                if (!config.PermaTrayIcon)
                 {
-                    icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+                    CreateTrayIcon();
                 }
-                catch (Exception)
-                {
-                    icon = SystemIcons.Application;
-                }
-                if (trayIcon != null)
-                {
-                    trayIcon.Visible = false;
-                    trayIcon.Dispose();
-                    trayIcon = null;
-                }
-                trayIcon = new NotifyIcon()
-                {
-                    Icon = icon,
-                    Text = "FFXIV",
-                    Visible = true,
-                };
-                trayIcon.Click += delegate
-                {
-                    if (TryFindGameWindow(out var tHwnd))
-                    {
-                        ShowWindow(tHwnd, config.TrayNoActivate?SW_SHOWNA:SW_SHOW);
-                        trayIcon.Visible = false;
-                        trayIcon.Dispose();
-                        trayIcon = null;
-                    }
-                };
                 ShowWindow(hwnd, SW_HIDE);
             }
             else
             {
                 Svc.PluginInterface.UiBuilder.AddNotification("Failed to minimize game", "Mini", NotificationType.Error);
             }
+        }
+
+        void CreateTrayIcon(bool ephemeral = true)
+        {
+            Icon icon;
+            try
+            {
+                icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+            }
+            catch (Exception)
+            {
+                icon = SystemIcons.Application;
+            }
+            TryDisposeTrayIcon();
+            trayIcon = new NotifyIcon()
+            {
+                Icon = icon,
+                Text = $"[Mini] Final Fantasy XIV #{Process.GetCurrentProcess().Id}",
+                Visible = true,
+            };
+            trayIcon.Click += delegate
+            {
+                if (TryFindGameWindow(out var tHwnd))
+                {
+                    ShowWindow(tHwnd, config.TrayNoActivate ? SW_SHOWNA : SW_SHOW);
+                    if (ephemeral)
+                    {
+                        trayIcon.Visible = false;
+                        trayIcon.Dispose();
+                        trayIcon = null;
+                    }
+                }
+            };
+        }
+
+        bool TryDisposeTrayIcon()
+        {
+            if (trayIcon != null)
+            {
+                trayIcon.Visible = false;
+                trayIcon.Dispose();
+                trayIcon = null;
+                return true;
+            }
+            return false;
         }
 
         void SetAlwaysVisible(bool value)
@@ -217,6 +241,17 @@ namespace Mini
                         ImGui.SetNextItemWidth(100f);
                         Static.ImGuiEnumCombo("Right click behavior", ref config.RightClickBehavior);
                         ImGui.Checkbox("Don't activate while restoring from tray", ref config.TrayNoActivate);
+                        if(ImGui.Checkbox("Create permanent tray icon", ref config.PermaTrayIcon))
+                        {
+                            if (config.PermaTrayIcon)
+                            {
+                                CreateTrayIcon(false);
+                            }
+                            else
+                            {
+                                TryDisposeTrayIcon();
+                            }
+                        }
                     }
                 }
                 ImGui.End();

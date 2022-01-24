@@ -22,5 +22,6 @@ namespace Mini
         public ClickBehavior LeftClickBehavior = ClickBehavior.Minimize;
         public ClickBehavior RightClickBehavior = ClickBehavior.None;
         public bool TrayNoActivate = false;
+        public bool PermaTrayIcon = false;
     }
 }

@@ -23,5 +23,7 @@ namespace Mini
         public ClickBehavior RightClickBehavior = ClickBehavior.None;
         public bool TrayNoActivate = false;
         public bool PermaTrayIcon = false;
+        public bool LimitFpsWhenMini = false;
+        public bool LimitFpsWhenMiniTray = false;
     }
 }

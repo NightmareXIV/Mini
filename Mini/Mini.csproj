@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Authors>Eternita</Authors>
-		<Version>2.0.0.5</Version>
+		<Version>2.0.0.7</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -26,18 +26,20 @@
 	<PropertyGroup>
 		<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
 	</PropertyGroup>
-	
-	<ItemGroup>
-		<None Remove="res\icon.png" />
-	</ItemGroup>
+
+	<PropertyGroup>
+		<PostBuildEvent>
+			rmdir .\Release /s /q
+			ping localhost -n 2 &gt;nul
+			powershell "(Get-Content .\$(MSBuildProjectName).json) -Replace '9.0.0.0', '$(Version)' | Set-Content .\$(MSBuildProjectName).json"
+			powershell Compress-Archive .\* ..\$(MSBuildProjectName)-$(Version).zip
+			mkdir .\Release
+			move ..\$(MSBuildProjectName)-$(Version).zip .\release\latest.zip
+			copy .\$(MSBuildProjectName).json .\release\.\$(MSBuildProjectName).json
+		</PostBuildEvent>
+	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="res\icon.png" Link="images\icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="DalamudLinter" Version="1.0.3" />
-		<PackageReference Include="DalamudPackager" Version="2.1.5" />
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 			<Private>False</Private>
@@ -62,5 +64,11 @@
 			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Mini.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>

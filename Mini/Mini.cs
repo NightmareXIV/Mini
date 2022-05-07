@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.Command;
+﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.Command;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
@@ -11,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Mini.Static;
@@ -25,6 +27,7 @@ namespace Mini
         Config config;
         Vector2 WindowPos = Vector2.Zero;
         NotifyIcon trayIcon = null;
+        bool FpsLimiterActive = false;
 
         public void Dispose()
         {
@@ -67,11 +70,33 @@ namespace Mini
             //miniThread = new MiniThread(this);
         }
 
+        void StartFpsLimiter()
+        {
+            if (!FpsLimiterActive
+                && !Svc.Condition[ConditionFlag.BoundByDuty56]
+                && !Svc.Condition[ConditionFlag.Crafting])
+            {
+                FpsLimiterActive = true;
+                Svc.Framework.Update += LimitFps;
+            }
+        }
+
+        void LimitFps(object _)
+        {
+            Thread.Sleep(1000);
+            if (Static.ApplicationIsActivated())
+            {
+                Svc.Framework.Update -= LimitFps;
+                FpsLimiterActive = false;
+            }
+        }
+
         void TryMinimize()
         {
             if (TryFindGameWindow(out var hwnd))
             {
                 ShowWindow(hwnd, SW_MINIMIZE);
+                if (config.LimitFpsWhenMini) StartFpsLimiter();
             }
             else
             {
@@ -88,6 +113,7 @@ namespace Mini
                     CreateTrayIcon();
                 }
                 ShowWindow(hwnd, SW_HIDE);
+                if (config.LimitFpsWhenMiniTray) StartFpsLimiter();
             }
             else
             {
@@ -252,6 +278,10 @@ namespace Mini
                                 TryDisposeTrayIcon();
                             }
                         }
+                        ImGui.Checkbox("Limit FPS to 1 while minimized to taskbar", ref config.LimitFpsWhenMini);
+                        ImGui.Checkbox("Limit FPS to 1 while minimized to tray", ref config.LimitFpsWhenMiniTray);
+                        ImGui.Text("   - FPS will not be limited while in duty of crafting");
+                        ImGui.Text("   - Unminimizing may take a second with this option");
                     }
                 }
                 ImGui.End();

@@ -34,6 +34,9 @@ namespace Mini
         [DllImport("user32.dll")]
         static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern IntPtr GetForegroundWindow();
+
         /*[DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool IsWindowVisible(IntPtr hWnd);*/
@@ -60,6 +63,22 @@ namespace Mini
             var num = Convert.ToInt32(refConfigField);
             ImGui.Combo(name, ref num, values, values.Length);
             refConfigField = Enum.GetValues(typeof(T)).Cast<T>().ToArray()[num];
+        }
+
+        /// <summary>Returns true if the current application has focus, false otherwise</summary>
+        public static bool ApplicationIsActivated()
+        {
+            var activatedHandle = GetForegroundWindow();
+            if (activatedHandle == IntPtr.Zero)
+            {
+                return false;       // No window is currently activated
+            }
+
+            var procId = Process.GetCurrentProcess().Id;
+            int activeProcId;
+            GetWindowThreadProcessId(activatedHandle, out activeProcId);
+
+            return activeProcId == procId;
         }
     }
 }

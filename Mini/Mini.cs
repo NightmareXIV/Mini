@@ -4,6 +4,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using ECommons.Interop;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Mini.Static;
+using static ECommons.Interop.WindowFunctionsExtern;
+using static ECommons.Interop.WindowFunctions;
+using ECommons.ImGuiMethods;
 
 namespace Mini
 {
@@ -84,7 +87,7 @@ namespace Mini
         void LimitFps(object _)
         {
             Thread.Sleep(1000);
-            if (Static.ApplicationIsActivated())
+            if (ApplicationIsActivated())
             {
                 Svc.Framework.Update -= LimitFps;
                 FpsLimiterActive = false;
@@ -93,7 +96,7 @@ namespace Mini
 
         void TryMinimize()
         {
-            if (TryFindGameWindow(out var hwnd))
+            if (WindowFunctions.TryFindGameWindow(out var hwnd))
             {
                 ShowWindow(hwnd, SW_MINIMIZE);
                 if (config.LimitFpsWhenMini) StartFpsLimiter();
@@ -198,7 +201,7 @@ namespace Mini
                     ImGui.PushStyleColor(ImGuiCol.Button, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, 0);
                 }
-                if (ImGuiIconButton(FontAwesomeIcon.WindowMinimize))
+                if (ImGuiEx.ImGuiIconButton(FontAwesomeIcon.WindowMinimize))
                 {
                     if (config.LeftClickBehavior == ClickBehavior.Minimize)
                     {
@@ -263,9 +266,9 @@ namespace Mini
                         if (config.Scale < 0.1f) config.Scale = 0.1f;
                         if (config.Scale > 50f) config.Scale = 50f;
                         ImGui.SetNextItemWidth(100f);
-                        Static.ImGuiEnumCombo("Left click behavior", ref config.LeftClickBehavior);
+                        ImGuiEx.ImGuiEnumCombo("Left click behavior", ref config.LeftClickBehavior);
                         ImGui.SetNextItemWidth(100f);
-                        Static.ImGuiEnumCombo("Right click behavior", ref config.RightClickBehavior);
+                        ImGuiEx.ImGuiEnumCombo("Right click behavior", ref config.RightClickBehavior);
                         ImGui.Checkbox("Don't activate while restoring from tray", ref config.TrayNoActivate);
                         if(ImGui.Checkbox("Create permanent tray icon", ref config.PermaTrayIcon))
                         {

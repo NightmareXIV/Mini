@@ -45,33 +45,35 @@ namespace Mini
         public Mini(DalamudPluginInterface pluginInterface)
         {
             ECommons.ECommons.Init(pluginInterface);
-            Svc.Commands.AddHandler("/mini", new CommandInfo(delegate(string command, string arguments)
-            {
-                if (arguments == "tray" || arguments == "t")
+            new TickScheduler(delegate { 
+                Svc.Commands.AddHandler("/mini", new CommandInfo(delegate(string command, string arguments)
                 {
-                    TryMinimizeToTray();
-                }
-                else if (arguments == "config" || arguments == "settings" || arguments == "c" || arguments == "s")
+                    if (arguments == "tray" || arguments == "t")
+                    {
+                        TryMinimizeToTray();
+                    }
+                    else if (arguments == "config" || arguments == "settings" || arguments == "c" || arguments == "s")
+                    {
+                        open = true;
+                    }
+                    else
+                    {
+                        TryMinimize();
+                    }
+                })
                 {
-                    open = true;
-                }
-                else
+                    HelpMessage = "Minimize the game\n/mini <t|tray> → Minimize to tray\n/mini <c|config|s|settings> → Open settings"
+                });
+                config = Svc.PluginInterface.GetPluginConfig() as Config ?? new Config();
+                WindowPos.Y = config.OffestY;
+                Svc.PluginInterface.UiBuilder.Draw += Draw;
+                Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { open = true; };
+                SetAlwaysVisible(config.AlwaysVisible);
+                if (config.PermaTrayIcon)
                 {
-                    TryMinimize();
+                    new TickScheduler(delegate { CreateTrayIcon(false); });
                 }
-            })
-            {
-                HelpMessage = "Minimize the game\n/mini <t|tray> → Minimize to tray\n/mini <c|config|s|settings> → Open settings"
             });
-            config = Svc.PluginInterface.GetPluginConfig() as Config ?? new Config();
-            WindowPos.Y = config.OffestY;
-            Svc.PluginInterface.UiBuilder.Draw += Draw;
-            Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { open = true; };
-            SetAlwaysVisible(config.AlwaysVisible);
-            if (config.PermaTrayIcon)
-            {
-                new TickScheduler(delegate { CreateTrayIcon(false); });
-            }
             //miniThread = new MiniThread(this);
         }
 

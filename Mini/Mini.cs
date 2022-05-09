@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+﻿global using ECommons.DalamudServices;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal.Notifications;
@@ -19,6 +20,7 @@ using System.Windows.Forms;
 using static ECommons.Interop.WindowFunctionsExtern;
 using static ECommons.Interop.WindowFunctions;
 using ECommons.ImGuiMethods;
+
 
 namespace Mini
 {
@@ -42,7 +44,7 @@ namespace Mini
 
         public Mini(DalamudPluginInterface pluginInterface)
         {
-            pluginInterface.Create<Svc>();
+            ECommons.ECommons.Init(pluginInterface);
             Svc.Commands.AddHandler("/mini", new CommandInfo(delegate(string command, string arguments)
             {
                 if (arguments == "tray" || arguments == "t")

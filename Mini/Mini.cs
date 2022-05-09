@@ -20,7 +20,7 @@ using System.Windows.Forms;
 using static ECommons.Interop.WindowFunctionsExtern;
 using static ECommons.Interop.WindowFunctions;
 using ECommons.ImGuiMethods;
-
+using ECommons.Schedulers;
 
 namespace Mini
 {
@@ -70,7 +70,7 @@ namespace Mini
             SetAlwaysVisible(config.AlwaysVisible);
             if (config.PermaTrayIcon)
             {
-                new TickScheduler(delegate { CreateTrayIcon(false); }, Svc.Framework);
+                new TickScheduler(delegate { CreateTrayIcon(false); });
             }
             //miniThread = new MiniThread(this);
         }

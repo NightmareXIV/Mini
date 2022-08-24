@@ -17,10 +17,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static ECommons.Interop.WindowFunctionsExtern;
 using static ECommons.Interop.WindowFunctions;
 using ECommons.ImGuiMethods;
 using ECommons.Schedulers;
+using PInvoke;
+using static PInvoke.User32;
 
 namespace Mini
 {
@@ -102,7 +103,7 @@ namespace Mini
         {
             if (WindowFunctions.TryFindGameWindow(out var hwnd))
             {
-                ShowWindow(hwnd, SW_MINIMIZE);
+                User32.ShowWindow(hwnd, WindowShowStyle.SW_MINIMIZE);
                 if (config.LimitFpsWhenMini) StartFpsLimiter();
             }
             else
@@ -150,7 +151,7 @@ namespace Mini
             {
                 if (TryFindGameWindow(out var tHwnd))
                 {
-                    ShowWindow(tHwnd, config.TrayNoActivate ? SW_SHOWNA : SW_SHOW);
+                    ShowWindow(tHwnd, config.TrayNoActivate ? WindowShowStyle.SW_SHOWNA : WindowShowStyle.SW_SHOW);
                     if (ephemeral)
                     {
                         trayIcon.Visible = false;
@@ -205,7 +206,7 @@ namespace Mini
                     ImGui.PushStyleColor(ImGuiCol.Button, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, 0);
                 }
-                if (ImGuiEx.ImGuiIconButton(FontAwesomeIcon.WindowMinimize))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.WindowMinimize))
                 {
                     if (config.LeftClickBehavior == ClickBehavior.Minimize)
                     {
@@ -270,9 +271,9 @@ namespace Mini
                         if (config.Scale < 0.1f) config.Scale = 0.1f;
                         if (config.Scale > 50f) config.Scale = 50f;
                         ImGui.SetNextItemWidth(100f);
-                        ImGuiEx.ImGuiEnumCombo("Left click behavior", ref config.LeftClickBehavior);
+                        ImGuiEx.EnumCombo("Left click behavior", ref config.LeftClickBehavior);
                         ImGui.SetNextItemWidth(100f);
-                        ImGuiEx.ImGuiEnumCombo("Right click behavior", ref config.RightClickBehavior);
+                        ImGuiEx.EnumCombo("Right click behavior", ref config.RightClickBehavior);
                         ImGui.Checkbox("Don't activate while restoring from tray", ref config.TrayNoActivate);
                         if(ImGui.Checkbox("Create permanent tray icon", ref config.PermaTrayIcon))
                         {

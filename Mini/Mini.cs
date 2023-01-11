@@ -22,6 +22,7 @@ using ECommons.ImGuiMethods;
 using ECommons.Schedulers;
 using PInvoke;
 using static PInvoke.User32;
+using ECommons;
 
 namespace Mini
 {
@@ -40,12 +41,13 @@ namespace Mini
             Svc.Commands.RemoveHandler("/mini");
             Svc.PluginInterface.UiBuilder.Draw -= Draw;
             TryDisposeTrayIcon();
+            ECommonsMain.Dispose();
             //miniThread.Dispose();
         }
 
         public Mini(DalamudPluginInterface pluginInterface)
         {
-            ECommons.ECommons.Init(pluginInterface);
+            ECommonsMain.Init(pluginInterface, this);
             new TickScheduler(delegate { 
                 Svc.Commands.AddHandler("/mini", new CommandInfo(delegate(string command, string arguments)
                 {

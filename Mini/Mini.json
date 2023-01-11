@@ -1,10 +1,10 @@
 ﻿{
-  "Author": "Eternita",
+  "Author": "NightmareXIV",
   "Name": "Mini",
   "Punchline": "Adds a button and a command to minimize your game into taskbar",
   "Description": "Additionally can minimize game to tray or create game's tray icon",
   "InternalName": "Mini",
-  "RepoUrl": "https://github.com/Eternita-S/Mini",
+  "RepoUrl": "https://github.com/NightmareXIV/Mini",
   "ApplicableVersion": "any",
   "LoadPriority": 0
 }

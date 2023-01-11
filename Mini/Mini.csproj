@@ -17,6 +17,7 @@
 		<NoWarn>CS1591</NoWarn>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
 	</PropertyGroup>
 
 	<PropertyGroup Label="Documentation">

@@ -48,7 +48,8 @@ namespace Mini
         public Mini(DalamudPluginInterface pluginInterface)
         {
             ECommonsMain.Init(pluginInterface, this);
-            new TickScheduler(delegate { 
+            new TickScheduler(delegate {
+                KoFiButton.IsOfficialPlugin = true;
                 Svc.Commands.AddHandler("/mini", new CommandInfo(delegate(string command, string arguments)
                 {
                     if (arguments == "tray" || arguments == "t")
@@ -202,6 +203,11 @@ namespace Mini
                     | ImGuiWindowFlags.AlwaysAutoResize
                     | ImGuiWindowFlags.NoBackground
                     | ImGuiWindowFlags.AlwaysUseWindowPadding);
+
+                if (config.AlwaysOnTop)
+                {
+                    Native.igBringWindowToDisplayFront(Native.igGetCurrentWindow());
+                }
                 ImGui.SetWindowFontScale(config.Scale);
                 if (config.TransparentButton && !isHovered)
                 {
@@ -292,8 +298,10 @@ namespace Mini
                         ImGui.Checkbox("Limit FPS to 1 while minimized to tray", ref config.LimitFpsWhenMiniTray);
                         ImGui.Text("   - FPS will not be limited while in duty of crafting");
                         ImGui.Text("   - Unminimizing may take a second with this option");
+                        ImGui.Checkbox("Minimize button always on top", ref config.AlwaysOnTop);
                     }
                 }
+                ImGuiEx.ImGuiLineCentered("donate", KoFiButton.DrawRaw);
                 ImGui.End();
                 if (!open)
                 {

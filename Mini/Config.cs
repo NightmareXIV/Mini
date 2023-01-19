@@ -25,5 +25,6 @@ namespace Mini
         public bool PermaTrayIcon = false;
         public bool LimitFpsWhenMini = false;
         public bool LimitFpsWhenMiniTray = false;
+        public bool AlwaysOnTop = false;
     }
 }

@@ -28,5 +28,6 @@ namespace Mini
         public bool AlwaysOnTop = false;
         public bool MuteWhenMinimized = false;
         public bool MuteWhenInTrayOnly = false;
+        public List<int> MuteChannels = null;
     }
 }

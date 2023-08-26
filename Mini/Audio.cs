@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using static ECommons.Interop.WindowFunctions;
 
@@ -6,9 +8,6 @@ namespace Mini
 {
     static internal class Audio
     {
-        public static readonly bool Debugging = false;
-        static bool muted = false;
-
         class ChannelWrapper
         {
             readonly string snMuted;  // Setting name: is channel muted
@@ -28,23 +27,65 @@ namespace Mini
             }
         }
 
-        static readonly List<ChannelWrapper> Channels = new()
+        static bool muted = false;
+        public static readonly bool Debugging = false;
+        public static Config config;  // Initialized in Mini constructor
+        public enum Channel : int
+        {
+            Master,
+            BGM,
+            Sound_Effects,
+            Voice,
+            System_Sounds,
+            Ambient_Sounds,
+            Performance,
+        }
+        public static readonly IEnumerable<(string name, int index)> Channels = Enum.GetNames(typeof(Audio.Channel))
+            .Select((name, index) => (name: name.Replace("_", " "), index));
+        static readonly ChannelWrapper[] channels =
         {
             new ChannelWrapper("IsSndMaster"),
+            new ChannelWrapper("IsSndBgm"),
+            new ChannelWrapper("IsSndSe"),
+            new ChannelWrapper("IsSndVoice"),
+            new ChannelWrapper("IsSndSystem"),
+            new ChannelWrapper("IsSndEnv"),
+            new ChannelWrapper("IsSndPerform"),
         };
 
-        public static void Mute()
+        public static void Mute(bool testing = false)
         {
             if (muted) return;
             muted = true;
-            Channels.ForEach(ch => ch.Mute());
-            Svc.Framework.Update += WatchForActivation;
+            for (int index = 0; index < channels.Length; index++)
+            {
+                if (config.MuteChannels.Contains(index))
+                {
+                    channels[index].Mute();
+                    if (index == (int)Channel.Master) break;
+                }
+            }
+            if (testing)
+            {
+                Task.Delay(3000).ContinueWith(_ => Unmute());
+            }
+            else
+            {
+                Svc.Framework.Update += WatchForActivation;
+            }
         }
 
         public static void Unmute()
         {
             if (!muted) return;
-            Channels.ForEach(ch => ch.Restore());
+            for (int index = 0; index < channels.Length; index++)
+            {
+                if (config.MuteChannels.Contains(index))
+                {
+                    channels[index].Restore();
+                    if (index == (int)Channel.Master) break;
+                }
+            }
             muted = false;
         }
 
@@ -53,7 +94,7 @@ namespace Mini
             if (ApplicationIsActivated())
             {
                 Svc.Framework.Update -= WatchForActivation;
-                Task.Delay(Debugging ? 3000 : 0).ContinueWith(_ => Unmute());
+                Unmute();
             }
         }
     }

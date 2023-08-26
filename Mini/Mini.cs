@@ -40,6 +40,7 @@ namespace Mini
         {
             Svc.Commands.RemoveHandler("/mini");
             Svc.PluginInterface.UiBuilder.Draw -= Draw;
+            Audio.Unmute();
             TryDisposeTrayIcon();
             ECommonsMain.Dispose();
             //miniThread.Dispose();
@@ -108,6 +109,7 @@ namespace Mini
             {
                 User32.ShowWindow(hwnd, WindowShowStyle.SW_MINIMIZE);
                 if (config.LimitFpsWhenMini) StartFpsLimiter();
+                if (config.MuteWhenMinimized && !config.MuteWhenInTrayOnly) Audio.Mute();
             }
             else
             {
@@ -125,6 +127,7 @@ namespace Mini
                 }
                 ShowWindow(hwnd, SW_HIDE);
                 if (config.LimitFpsWhenMiniTray) StartFpsLimiter();
+                if (config.MuteWhenMinimized) Audio.Mute();
             }
             else
             {
@@ -299,6 +302,15 @@ namespace Mini
                         ImGui.Text("   - FPS will not be limited while in duty of crafting");
                         ImGui.Text("   - Unminimizing may take a second with this option");
                         ImGui.Checkbox("Minimize button always on top", ref config.AlwaysOnTop);
+                    }
+
+                    if (Audio.Debugging && ImGui.Button("Test minimization muting")) Audio.Mute();
+                    ImGui.Checkbox("Mute audio when minimized", ref config.MuteWhenMinimized);
+                    if (config.MuteWhenMinimized)
+                    {
+                        ImGui.Indent();
+                        ImGui.Checkbox("Mute only when in tray", ref config.MuteWhenInTrayOnly);
+                        ImGui.Unindent();
                     }
                 }
                 ImGuiEx.ImGuiLineCentered("donate", KoFiButton.DrawRaw);

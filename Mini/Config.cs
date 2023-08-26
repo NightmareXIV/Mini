@@ -26,5 +26,7 @@ namespace Mini
         public bool LimitFpsWhenMini = false;
         public bool LimitFpsWhenMiniTray = false;
         public bool AlwaysOnTop = false;
+        public bool MuteWhenMinimized = false;
+        public bool MuteWhenInTrayOnly = false;
     }
 }

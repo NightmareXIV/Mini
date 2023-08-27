@@ -35,11 +35,13 @@ namespace Mini
         Vector2 WindowPos = Vector2.Zero;
         NotifyIcon trayIcon = null;
         bool FpsLimiterActive = false;
+        bool[] muted;
 
         public void Dispose()
         {
             Svc.Commands.RemoveHandler("/mini");
             Svc.PluginInterface.UiBuilder.Draw -= Draw;
+            Audio.Unmute();
             TryDisposeTrayIcon();
             ECommonsMain.Dispose();
             //miniThread.Dispose();
@@ -77,6 +79,15 @@ namespace Mini
                 {
                     new TickScheduler(delegate { CreateTrayIcon(false); });
                 }
+                // Init audio settings
+                if (config.MuteChannels == null)
+                {
+                    config.MuteChannels = new() { (int)Audio.Channel.Master };
+                }
+                Audio.config = config;
+                this.muted = (bool[])Enum.GetValues(typeof(Audio.Channel))
+                    .Cast<int>()
+                    .Select(ch => config.MuteChannels.Contains(ch)).ToArray();
             });
             //miniThread = new MiniThread(this);
         }
@@ -108,6 +119,7 @@ namespace Mini
             {
                 User32.ShowWindow(hwnd, WindowShowStyle.SW_MINIMIZE);
                 if (config.LimitFpsWhenMini) StartFpsLimiter();
+                if (config.MuteWhenMinimized && !config.MuteWhenInTrayOnly) Audio.Mute();
             }
             else
             {
@@ -125,6 +137,7 @@ namespace Mini
                 }
                 ShowWindow(hwnd, SW_HIDE);
                 if (config.LimitFpsWhenMiniTray) StartFpsLimiter();
+                if (config.MuteWhenMinimized) Audio.Mute();
             }
             else
             {
@@ -299,6 +312,40 @@ namespace Mini
                         ImGui.Text("   - FPS will not be limited while in duty of crafting");
                         ImGui.Text("   - Unminimizing may take a second with this option");
                         ImGui.Checkbox("Minimize button always on top", ref config.AlwaysOnTop);
+                    }
+
+                    if (Audio.Debugging && ImGui.Button("Test minimization muting")) Audio.Mute(true);
+                    ImGui.Checkbox("Mute audio when minimized", ref config.MuteWhenMinimized);
+                    if (config.MuteWhenMinimized)
+                    {
+                        ImGui.Indent();
+                        ImGui.Checkbox("Mute only when in tray", ref config.MuteWhenInTrayOnly);
+                        ImGui.Checkbox("Mute all channels", ref muted[(int)Audio.Channel.Master]);
+                        if (!muted[(int)Audio.Channel.Master])
+                        {
+                            config.MuteChannels.Remove((int)Audio.Channel.Master);
+                            // Individual channels selector
+                            ImGui.Indent();
+                            foreach ((string name, int index) in Audio.Channels)
+                            {
+                                if (index == (int)Audio.Channel.Master) continue;
+                                ImGui.Checkbox(name, ref muted[index]);
+                                if (!muted[index])
+                                {
+                                    config.MuteChannels.Remove(index);
+                                }
+                                else if (!config.MuteChannels.Contains(index))
+                                {
+                                    config.MuteChannels.Add(index);
+                                }
+                            }
+                            ImGui.Unindent();
+                        }
+                        else if (!config.MuteChannels.Contains((int)Audio.Channel.Master))
+                        {
+                            config.MuteChannels.Add((int)Audio.Channel.Master);
+                        }
+                        ImGui.Unindent();
                     }
                 }
                 ImGuiEx.ImGuiLineCentered("donate", KoFiButton.DrawRaw);

@@ -1,4 +1,5 @@
 ﻿global using ECommons.DalamudServices;
+global using Dalamud.Interface.Utility;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Interface;

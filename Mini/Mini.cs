@@ -313,7 +313,7 @@ public class Mini : IDalamudPlugin
                     }
                     ImGui.Checkbox("Limit FPS to 1 while minimized to taskbar", ref config.LimitFpsWhenMini);
                     ImGui.Checkbox("Limit FPS to 1 while minimized to tray", ref config.LimitFpsWhenMiniTray);
-                    ImGui.Text("   - FPS will not be limited while in duty of crafting");
+                    ImGui.Text("   - FPS will not be limited while in duty or crafting");
                     ImGui.Text("   - Unminimizing may take a second with this option");
                     ImGui.Checkbox("Minimize button always on top", ref config.AlwaysOnTop);
                 }

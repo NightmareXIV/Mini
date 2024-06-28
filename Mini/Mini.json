@@ -7,5 +7,6 @@
     "RepoUrl": "https://github.com/NightmareXIV/Mini",
     "ApplicableVersion": "any",
     "LoadPriority": 0,
-    "AcceptsFeedback": false
+    "AcceptsFeedback": false,
+    "ApiLevel": 10
 }

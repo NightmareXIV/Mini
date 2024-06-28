@@ -3,7 +3,6 @@ global using Dalamud.Interface.Utility;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using ECommons.Interop;
@@ -27,7 +26,7 @@ using ECommons;
 
 namespace Mini
 {
-    class Mini : IDalamudPlugin
+    public class Mini : IDalamudPlugin
     {
         public string Name => "Mini";
         bool isHovered = false;
@@ -124,7 +123,7 @@ namespace Mini
             }
             else
             {
-                Svc.PluginInterface.UiBuilder.AddNotification("Failed to minimize game", "Mini", NotificationType.Error);
+                Notify.Error("Failed to minimize game");
             }
         }
 
@@ -142,7 +141,7 @@ namespace Mini
             }
             else
             {
-                Svc.PluginInterface.UiBuilder.AddNotification("Failed to minimize game", "Mini", NotificationType.Error);
+                Notify.Error("Failed to minimize game");
             }
         }
 
@@ -354,7 +353,7 @@ namespace Mini
                 if (!open)
                 {
                     Svc.PluginInterface.SavePluginConfig(config);
-                    Svc.PluginInterface.UiBuilder.AddNotification("Configuration saved", "Mini", NotificationType.Success);
+                    Notify.Success("Configuration saved");
                     SetAlwaysVisible(config.AlwaysVisible);
                 }
             }

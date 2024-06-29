@@ -49,7 +49,7 @@ public class Mini : IDalamudPlugin
         //miniThread.Dispose();
     }
 
-    public Mini(DalamudPluginInterface pluginInterface)
+    public Mini(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this);
         PatreonBanner.IsOfficialPlugin = () => true;

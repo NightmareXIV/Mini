@@ -6,6 +6,7 @@ using Dalamud.Interface;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using ECommons;
+using ECommons.Configuration;
 using ECommons.Funding;
 using ECommons.ImGuiMethods;
 using ECommons.Interop;
@@ -52,10 +53,11 @@ public class Mini : IDalamudPlugin
     public Mini(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this);
+        EzConfig.PluginConfigDirectoryOverride = "Mini";
         PatreonBanner.IsOfficialPlugin = () => true;
         new TickScheduler(delegate
         {
-            KoFiButton.IsOfficialPlugin = true;
+            PatreonBanner.IsOfficialPlugin = () => true;
             Svc.Commands.AddHandler("/mini", new CommandInfo(delegate (string command, string arguments)
             {
                 if (arguments == "tray" || arguments == "t")
@@ -74,7 +76,8 @@ public class Mini : IDalamudPlugin
             {
                 HelpMessage = "Minimize the game\n/mini <t|tray> → Minimize to tray\n/mini <c|config|s|settings> → Open settings"
             });
-            config = Svc.PluginInterface.GetPluginConfig() as Config ?? new Config();
+            EzConfig.Migrate<Config>();
+            config = EzConfig.Init<Config>();
             WindowPos.Y = config.OffestY;
             Svc.PluginInterface.UiBuilder.Draw += Draw;
             Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { open = true; };
@@ -356,7 +359,7 @@ public class Mini : IDalamudPlugin
             ImGui.End();
             if (!open)
             {
-                Svc.PluginInterface.SavePluginConfig(config);
+                EzConfig.Save();
                 Notify.Success("Configuration saved");
                 SetAlwaysVisible(config.AlwaysVisible);
             }

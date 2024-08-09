@@ -1,4 +1,5 @@
 ﻿using Dalamud.Configuration;
+using ECommons.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 namespace Mini;
 
 [Serializable]
-internal class Config : IPluginConfiguration
+internal class Config : IEzConfig
 {
     public int Version { get; set; } = 1;
     public int Position = 0;

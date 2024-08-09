@@ -167,7 +167,7 @@ public class Mini : IDalamudPlugin
         trayIcon = new NotifyIcon()
         {
             Icon = icon,
-            Text = $"[Mini] Final Fantasy XIV #{Process.GetCurrentProcess().Id}",
+            Text = $"[Mini] Final Fantasy XIV",
             Visible = true,
         };
         trayIcon.Click += delegate

@@ -27,6 +27,7 @@
 
 	<PropertyGroup>
 		<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+		<RootNamespace>Mini</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>

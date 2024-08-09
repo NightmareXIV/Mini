@@ -3,7 +3,6 @@ global using ECommons.DalamudServices;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using ECommons;
 using ECommons.Configuration;
@@ -11,17 +10,14 @@ using ECommons.Funding;
 using ECommons.ImGuiMethods;
 using ECommons.Interop;
 using ECommons.Schedulers;
+using ECommons.Singletons;
 using ImGuiNET;
 using PInvoke;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static ECommons.Interop.WindowFunctions;
 using static PInvoke.User32;
@@ -54,6 +50,7 @@ public class Mini : IDalamudPlugin
     {
         ECommonsMain.Init(pluginInterface, this);
         EzConfig.PluginConfigDirectoryOverride = "Mini";
+        SingletonServiceManager.Initialize(typeof(S));
         PatreonBanner.IsOfficialPlugin = () => true;
         new TickScheduler(delegate
         {
@@ -112,6 +109,7 @@ public class Mini : IDalamudPlugin
 
     private void LimitFps(object _)
     {
+        if(S.IPCProvider.UnlockIPCRequests.Values.Any(x => x > Environment.TickCount64)) return;
         Thread.Sleep(1000);
         if (ApplicationIsActivated())
         {

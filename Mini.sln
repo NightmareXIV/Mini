@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31612.314
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mini.NXIV", "Mini\Mini.NXIV.csproj", "{18124BBA-E7DC-4354-9A02-1EB2D388B6F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mini", "Mini\Mini.csproj", "{18124BBA-E7DC-4354-9A02-1EB2D388B6F1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{A7042049-3952-44D7-889C-2EED71D19532}"
 EndProject
@@ -27,8 +27,8 @@ Global
 		{A7042049-3952-44D7-889C-2EED71D19532}.Debug|Any CPU.Build.0 = Debug|x64
 		{A7042049-3952-44D7-889C-2EED71D19532}.Debug|x64.ActiveCfg = Debug|x64
 		{A7042049-3952-44D7-889C-2EED71D19532}.Debug|x64.Build.0 = Debug|x64
-		{A7042049-3952-44D7-889C-2EED71D19532}.Release|Any CPU.ActiveCfg = ReleaseForms|x64
-		{A7042049-3952-44D7-889C-2EED71D19532}.Release|Any CPU.Build.0 = ReleaseForms|x64
+		{A7042049-3952-44D7-889C-2EED71D19532}.Release|Any CPU.ActiveCfg = Release|x64
+		{A7042049-3952-44D7-889C-2EED71D19532}.Release|Any CPU.Build.0 = Release|x64
 		{A7042049-3952-44D7-889C-2EED71D19532}.Release|x64.ActiveCfg = Release|x64
 		{A7042049-3952-44D7-889C-2EED71D19532}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

@@ -9,21 +9,23 @@ using ECommons.Configuration;
 using ECommons.Funding;
 using ECommons.ImGuiMethods;
 using ECommons.Interop;
+using ECommons.Logging;
+using ECommons.Reflection;
 using ECommons.Schedulers;
 using ECommons.Singletons;
 using ImGuiNET;
 using PInvoke;
 using System;
-using System.Drawing;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Threading;
-using System.Windows.Forms;
 using static ECommons.Interop.WindowFunctions;
 using static PInvoke.User32;
 
 namespace Mini;
-
+#nullable disable
 public class Mini : IDalamudPlugin
 {
     public string Name => "Mini";
@@ -32,7 +34,7 @@ public class Mini : IDalamudPlugin
     private bool open = false;
     private Config config;
     private Vector2 WindowPos = Vector2.Zero;
-    private NotifyIcon trayIcon = null;
+    private object trayIcon = null;
     private bool FpsLimiterActive = false;
     private bool[] muted;
 
@@ -110,7 +112,7 @@ public class Mini : IDalamudPlugin
     private void LimitFps(object _)
     {
         if(S.IPCProvider.UnlockIPCRequests.Values.Any(x => x > Environment.TickCount64)) return;
-        Thread.Sleep(1000);
+        Thread.Sleep(1000 / Math.Clamp(config.FpsLimit, 1, 1000));
         if (ApplicationIsActivated())
         {
             Svc.Framework.Update -= LimitFps;
@@ -136,11 +138,19 @@ public class Mini : IDalamudPlugin
     {
         if (TryFindGameWindow(out var hwnd))
         {
+            var success = trayIcon?.GetFoP<bool>("Visible") == true;
             if (!config.PermaTrayIcon)
             {
-                CreateTrayIcon();
+                success = CreateTrayIcon();
             }
-            ShowWindow(hwnd, SW_HIDE);
+            if(success)
+            {
+                ShowWindow(hwnd, SW_HIDE);
+            }
+            else
+            {
+                Notify.Error("Could not minimize to tray");
+            }
             if (config.LimitFpsWhenMiniTray) StartFpsLimiter();
             if (config.MuteWhenMinimized) Audio.Mute();
         }
@@ -150,45 +160,58 @@ public class Mini : IDalamudPlugin
         }
     }
 
-    private void CreateTrayIcon(bool ephemeral = true)
+    private bool CreateTrayIcon(bool ephemeral = true)
     {
-        Icon icon;
         try
         {
-            icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-        }
-        catch (Exception)
-        {
-            icon = SystemIcons.Application;
-        }
-        TryDisposeTrayIcon();
-        trayIcon = new NotifyIcon()
-        {
-            Icon = icon,
-            Text = $"[Mini] Final Fantasy XIV",
-            Visible = true,
-        };
-        trayIcon.Click += delegate
-        {
-            if (TryFindGameWindow(out var tHwnd))
+            var iconType = Utils.GetTypeFromRuntimeAssembly("System.Drawing.Common", "System.Drawing.Icon");
+            var notifyIconType = Utils.GetTypeFromRuntimeAssembly("System.Windows.Forms", "System.Windows.Forms.NotifyIcon");
+
+            object icon;
+            try
             {
-                ShowWindow(tHwnd, config.TrayNoActivate ? WindowShowStyle.SW_SHOWNA : WindowShowStyle.SW_SHOW);
-                if (ephemeral)
-                {
-                    trayIcon.Visible = false;
-                    trayIcon.Dispose();
-                    trayIcon = null;
-                }
+                icon = iconType.GetMethods(ReflectionHelper.AllFlags).First(x => x.Name == "ExtractAssociatedIcon" && x.GetParameters().Select(p => p.ParameterType).SequenceEqual([typeof(string)])).Invoke(null, [Process.GetCurrentProcess().MainModule.FileName]);
             }
-        };
+            catch(Exception e)
+            {
+                e.Log();
+                icon = iconType.Assembly.GetType("System.Drawing.SystemIcons").GetFieldPropertyUnion("Application", ReflectionHelper.AllFlags).GetValue(null);
+            }
+            TryDisposeTrayIcon();
+
+            trayIcon = Activator.CreateInstance(notifyIconType);
+            trayIcon.SetFoP("Icon", icon);
+            trayIcon.SetFoP("Text", "[Mini] Final Fantasy XIV");
+            trayIcon.SetFoP("Visible", true);
+            EventHandler d = delegate
+            {
+                if(TryFindGameWindow(out var tHwnd))
+                {
+                    ShowWindow(tHwnd, config.TrayNoActivate ? WindowShowStyle.SW_SHOWNA : WindowShowStyle.SW_SHOW);
+                    if(ephemeral)
+                    {
+                        trayIcon.SetFoP("Visible", false);
+                        trayIcon.Call("Dispose", [], true);
+                        trayIcon = null;
+                    }
+                }
+            };
+            trayIcon.GetType().GetEvent("Click").AddEventHandler(trayIcon, d);
+            return true;
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
+        return false;
     }
 
     private bool TryDisposeTrayIcon()
     {
         if (trayIcon != null)
         {
-            trayIcon.Visible = false;
-            trayIcon.Dispose();
+            trayIcon.SetFoP("Visible", false);
+            trayIcon.Call("Dispose", [], true);
             trayIcon = null;
             return true;
         }
@@ -312,8 +335,10 @@ public class Mini : IDalamudPlugin
                             TryDisposeTrayIcon();
                         }
                     }
-                    ImGui.Checkbox("Limit FPS to 1 while minimized to taskbar", ref config.LimitFpsWhenMini);
-                    ImGui.Checkbox("Limit FPS to 1 while minimized to tray", ref config.LimitFpsWhenMiniTray);
+                    ImGui.Checkbox("Limit FPS while minimized to taskbar", ref config.LimitFpsWhenMini);
+                    ImGui.Checkbox("Limit FPS while minimized to tray", ref config.LimitFpsWhenMiniTray);
+                    ImGui.SetNextItemWidth(150f);
+                    ImGuiEx.SliderInt("FPS when limiter active", ref config.FpsLimit, 1, 30);
                     ImGui.Text("   - FPS will not be limited while in duty or crafting");
                     ImGui.Text("   - Unminimizing may take a second with this option");
                     ImGui.Checkbox("Minimize button always on top", ref config.AlwaysOnTop);

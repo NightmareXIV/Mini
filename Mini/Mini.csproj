@@ -2,15 +2,13 @@
 <Project Sdk="Dalamud.NET.Sdk/11.0.0">
 	<PropertyGroup>
 		<Authors>NightmareXIV</Authors>
-		<Version>2.1.1.0</Version>
+		<Version>2.1.1.5</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<Platforms>x64</Platforms>
 		<OutputPath>bin\$(Configuration)\</OutputPath>
 		<NoWarn>CS1591</NoWarn>
-		<UseWindowsForms>true</UseWindowsForms>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
 	</PropertyGroup>
 
 	<PropertyGroup Label="Documentation">

@@ -29,5 +29,6 @@ internal class Config : IEzConfig
     public bool AlwaysOnTop = false;
     public bool MuteWhenMinimized = false;
     public bool MuteWhenInTrayOnly = false;
-    public List<int> MuteChannels = null;
+    public List<int> MuteChannels = [];
+    public int FpsLimit = 1;
 }

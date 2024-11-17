@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/11.0.0">
 	<PropertyGroup>
 		<Authors>NightmareXIV</Authors>
-		<Version>2.1.1.5</Version>
+		<Version>2.1.1.0</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -19,6 +19,10 @@
 	<PropertyGroup>
 		<RootNamespace>Mini</RootNamespace>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="Mini.json" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />

@@ -8,5 +8,5 @@
     "ApplicableVersion": "any",
     "LoadPriority": 0,
     "AcceptsFeedback": false,
-    "DalamudApiLevel": 12
+    "DalamudApiLevel": 13
 }

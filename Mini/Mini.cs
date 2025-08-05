@@ -13,8 +13,7 @@ using ECommons.Logging;
 using ECommons.Reflection;
 using ECommons.Schedulers;
 using ECommons.Singletons;
-using ImGuiNET;
-using PInvoke;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -22,7 +21,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading;
 using static ECommons.Interop.WindowFunctions;
-using static PInvoke.User32;
+using TerraFX.Interop.Windows;
 
 namespace Mini;
 #nullable disable
@@ -124,7 +123,7 @@ public class Mini : IDalamudPlugin
     {
         if (WindowFunctions.TryFindGameWindow(out var hwnd))
         {
-            User32.ShowWindow(hwnd, WindowShowStyle.SW_MINIMIZE);
+            NativeFunctions.ShowWindow(hwnd, SW.SW_MINIMIZE);
             if (config.LimitFpsWhenMini) StartFpsLimiter();
             if (config.MuteWhenMinimized && !config.MuteWhenInTrayOnly) Audio.Mute();
         }
@@ -145,7 +144,7 @@ public class Mini : IDalamudPlugin
             }
             if(success)
             {
-                ShowWindow(hwnd, SW_HIDE);
+                NativeFunctions.ShowWindow(hwnd, SW.SW_HIDE);
             }
             else
             {
@@ -187,7 +186,7 @@ public class Mini : IDalamudPlugin
             {
                 if(TryFindGameWindow(out var tHwnd))
                 {
-                    ShowWindow(tHwnd, config.TrayNoActivate ? WindowShowStyle.SW_SHOWNA : WindowShowStyle.SW_SHOW);
+                    NativeFunctions.ShowWindow(tHwnd, config.TrayNoActivate ? SW.SW_SHOWNA : SW.SW_SHOW);
                     if(ephemeral)
                     {
                         trayIcon.SetFoP("Visible", false);

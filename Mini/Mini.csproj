@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/12.0.2">
+<Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
 		<Authors>NightmareXIV</Authors>
-		<Version>2.1.1.1</Version>
+		<Version>2.1.1.2</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -29,14 +29,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="PInvoke.User32">
-			<HintPath>$(DalamudLibPath)PInvoke.User32.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="PInvoke.Windows.Core">
-			<HintPath>$(DalamudLibPath)PInvoke.Windows.Core.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
+      <Reference Include="TerraFX.Interop.Windows">
+          <HintPath>$(DalamudLibPath)TerraFX.Interop.Windows.dll</HintPath>
+          <Private>False</Private>
+      </Reference>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -14,8 +14,11 @@
         "resolved": "1.2.25",
         "contentHash": "xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg=="
       },
-      "ecommons": {
-        "type": "Project"
+      "ECommons": {
+        "type": "Direct",
+        "requested": "[3.0.0.18-api13, )",
+        "resolved": "3.0.0.18-api13",
+        "contentHash": "eNkfaaUbkZhuLnCqCRwWDSFeb98cojOGboaSrXq6LHJSejv4srWVzacqRKqGBEMP8gosir2s5Aj1Y8gkTmu8xA=="
       }
     }
   }

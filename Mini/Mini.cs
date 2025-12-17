@@ -123,7 +123,7 @@ public class Mini : IDalamudPlugin
     {
         if (WindowFunctions.TryFindGameWindow(out var hwnd))
         {
-            NativeFunctions.ShowWindow(hwnd, SW.SW_MINIMIZE);
+            TerraFX.Interop.Windows.Windows.ShowWindow(hwnd, SW.SW_MINIMIZE);
             if (config.LimitFpsWhenMini) StartFpsLimiter();
             if (config.MuteWhenMinimized && !config.MuteWhenInTrayOnly) Audio.Mute();
         }
@@ -144,7 +144,7 @@ public class Mini : IDalamudPlugin
             }
             if(success)
             {
-                NativeFunctions.ShowWindow(hwnd, SW.SW_HIDE);
+                TerraFX.Interop.Windows.Windows.ShowWindow(hwnd, SW.SW_HIDE);
             }
             else
             {
@@ -186,7 +186,7 @@ public class Mini : IDalamudPlugin
             {
                 if(TryFindGameWindow(out var tHwnd))
                 {
-                    NativeFunctions.ShowWindow(tHwnd, config.TrayNoActivate ? SW.SW_SHOWNA : SW.SW_SHOW);
+                    TerraFX.Interop.Windows.Windows.ShowWindow(tHwnd, config.TrayNoActivate ? SW.SW_SHOWNA : SW.SW_SHOW);
                     if(ephemeral)
                     {
                         trayIcon.SetFoP("Visible", false);

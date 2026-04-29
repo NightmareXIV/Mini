@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/14.0.1">
 	<PropertyGroup>
 		<Authors>NightmareXIV</Authors>
-		<Version>2.1.1.4</Version>
+		<Version>2.1.1.5</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -43,6 +43,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="DalamudPackager" Version="14.0.2" />
+	  <PackageReference Update="DalamudPackager" Version="15.0.0" />
 	</ItemGroup>
 </Project>

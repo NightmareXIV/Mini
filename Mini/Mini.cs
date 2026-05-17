@@ -27,11 +27,10 @@ namespace Mini;
 #nullable disable
 public class Mini : IDalamudPlugin
 {
-    public string Name => "Mini";
-
+    public static Mini P;
     private bool isHovered = false;
     private bool open = false;
-    private Config config;
+    public Config config;
     private Vector2 WindowPos = Vector2.Zero;
     private object trayIcon = null;
     private bool FpsLimiterActive = false;
@@ -44,14 +43,15 @@ public class Mini : IDalamudPlugin
         Audio.Unmute();
         TryDisposeTrayIcon();
         ECommonsMain.Dispose();
+        P = null;
         //miniThread.Dispose();
     }
 
     public Mini(IDalamudPluginInterface pluginInterface)
     {
+        P = this;
         ECommonsMain.Init(pluginInterface, this);
         EzConfig.PluginConfigDirectoryOverride = "Mini";
-        SingletonServiceManager.Initialize(typeof(S));
         PatreonBanner.IsOfficialPlugin = () => true;
         new TickScheduler(delegate
         {
@@ -76,6 +76,7 @@ public class Mini : IDalamudPlugin
             });
             EzConfig.Migrate<Config>();
             config = EzConfig.Init<Config>();
+            SingletonServiceManager.Initialize(typeof(S));
             WindowPos.Y = config.OffestY;
             Svc.PluginInterface.UiBuilder.Draw += Draw;
             Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { open = true; };
@@ -225,7 +226,7 @@ public class Mini : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.DisableUserUiHide = value;
     }
 
-    private void Draw()
+    private unsafe void Draw()
     {
         if (config.DisplayButton)
         {
@@ -374,6 +375,31 @@ public class Mini : IDalamudPlugin
                     {
                         config.MuteChannels.Add((int)Audio.Channel.Master);
                     }
+                    ImGui.Unindent();
+                }
+
+                if(ImGui.Checkbox("Disable rendering while minimized", ref config.EnableDisableIconicRender))
+                {
+                    if(!config.EnableDisableIconicRender)
+                    {
+                        *S.RenderSuppressionManager.RenderDisabled = 0;
+                    }
+                }
+                ImGuiEx.HelpMarker($"""
+                    Disables 3D render while game is minimized. 
+                    
+                    This option will bring GPU usage down significantly while game is minimized. 
+                    
+                    This option is experimental and may cause crashes or graphical glitches, especially when used with other plugins that alter rendering or mods. 
+                    
+                    This option should only be used with some sort of FPS limiter, be it in-game limiter, limiter that is built into Mini plugin, other plugin, RivaTuner Statistics Server, GPU-specific software or any other form of frame limiting. 
+                    """, EColor.RedBright, FontAwesomeIcon.ExclamationTriangle.ToIconString());
+                if(config.EnableDisableIconicRender)
+                {
+                    ImGui.Indent();
+                    ImGui.Checkbox("Test", ref S.RenderSuppressionManager.Test);
+                    ImGui.SetNextItemWidth(100f);
+                    ImGuiEx.SliderInt("Render every Xth frame", ref config.RenderEvery.ValidateRange(1, 900), 1, 60, config.RenderEvery == 1?"Disable":default);
                     ImGui.Unindent();
                 }
             }

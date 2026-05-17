@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Mini;
 
 [Serializable]
-internal class Config : IEzConfig
+public class Config
 {
     public int Version { get; set; } = 1;
     public int Position = 0;
@@ -31,4 +31,6 @@ internal class Config : IEzConfig
     public bool MuteWhenInTrayOnly = false;
     public List<int> MuteChannels = [];
     public int FpsLimit = 1;
+    public bool EnableDisableIconicRender = false;
+    public int RenderEvery = 20;
 }

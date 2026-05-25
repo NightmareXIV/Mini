@@ -22,6 +22,8 @@ using System.Reflection;
 using System.Threading;
 using static ECommons.Interop.WindowFunctions;
 using TerraFX.Interop.Windows;
+using ECommons.GameFunctions;
+using Module = ECommons.Module;
 
 namespace Mini;
 #nullable disable
@@ -382,7 +384,7 @@ public class Mini : IDalamudPlugin
                 {
                     if(!config.EnableDisableIconicRender)
                     {
-                        *S.RenderSuppressionManager.RenderDisabled = 0;
+                        RenderDisableManager.RemoveRequest();
                     }
                 }
                 ImGuiEx.HelpMarker($"""
@@ -398,6 +400,8 @@ public class Mini : IDalamudPlugin
                 {
                     ImGui.Indent();
                     ImGui.Checkbox("Test", ref S.RenderSuppressionManager.Test);
+                    ImGui.SameLine();
+                    ImGui.Checkbox("Log", ref RenderDisableManager.Debug);
                     ImGui.SetNextItemWidth(100f);
                     ImGuiEx.SliderInt("Render every Xth frame", ref config.RenderEvery.ValidateRange(1, 900), 1, 60, config.RenderEvery == 1?"Disable":default);
                     ImGui.Unindent();

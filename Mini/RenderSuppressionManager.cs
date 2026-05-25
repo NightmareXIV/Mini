@@ -10,28 +10,27 @@ using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Render;
 using static Mini.Mini;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using ECommons.GameFunctions;
 
 namespace Mini;
 
 public unsafe class RenderSuppressionManager : IDisposable
 {
     //Client::System::Framework::Framework_TaskRenderGraphicsRender()
-    public byte* RenderDisabled => (byte*)(((nint)Manager.Instance()) + 230232);
     public uint* FrameCounter = &Framework.Instance()->FrameCounter;
-    public nint* Handle = (nint*)Svc.SigScanner.GetStaticAddressFromSig("48 89 1D ?? ?? ?? ?? 48 8B CB FF 15");
     public bool Test = false;
 
     public void Tick(object _)
     {
         if(P.config.EnableDisableIconicRender)
         {
-            if((Test || TerraFX.Interop.Windows.Windows.IsIconic((TerraFX.Interop.Windows.HWND)(*Handle))) && (P.config.RenderEvery < 2 || * FrameCounter % P.config.RenderEvery != 0))
+            if((Test || TerraFX.Interop.Windows.Windows.IsIconic((TerraFX.Interop.Windows.HWND)(*ECommonsMain.MainWindowHandle))) && (P.config.RenderEvery < 2 || * FrameCounter % P.config.RenderEvery != 0))
             {
-                *RenderDisabled = 1;
+                RenderDisableManager.PlaceRequest();
             }
             else
             {
-                *RenderDisabled = 0;
+                RenderDisableManager.RemoveRequest();
             }
         }
     }
@@ -44,6 +43,6 @@ public unsafe class RenderSuppressionManager : IDisposable
     public void Dispose()
     {
         Svc.Framework.Update -= Tick;
-        *RenderDisabled = 0;
+        RenderDisableManager.RemoveRequest();
     }
 }
